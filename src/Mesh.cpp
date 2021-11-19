@@ -1,21 +1,40 @@
 #include "Mesh.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) {
-    this->vertices = vertices;
-    this->indices = indices;
-    this->textures = textures;
+    this->vertices = std::move(vertices);
+    this->indices = std::move(indices);
+    this->textures = std::move(textures);
 
     SetupMesh();
 }
 
 /* TODO: Refactor this */
 void Mesh::Draw(Shader &shader) {
-    /* TODO: Draw Texture */
+    /* Draw Texture */
+    unsigned int diffuseNr = 1;
+    unsigned int specularNr = 1;
+    unsigned int normalNr = 1;
+    unsigned int heightNr = 1;
+    for (unsigned int i = 0; i < this->textures.size(); i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        std::string number;
+        std::string name = this->textures[i].type;
+        if (name == "texture_diffuse") number = std::to_string(diffuseNr++);
+        else if (name == "texture_specular") number = std::to_string(specularNr++);
+        else if (name == "texture_normal") number = std::to_string(normalNr++);
+        else if (name == "texture_height") number = std::to_string(heightNr++);
+
+        glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+        glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
+    }
 
     /* Draw Mesh */
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+
+    /* Set Active Texture Back to Defaults */
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::SetupMesh() {
@@ -45,6 +64,14 @@ void Mesh::SetupMesh() {
     /* Texture Coords */
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+    /* Vertex Tangent */
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+
+    /* Vertex BiTangent */
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
     glBindVertexArray(0);
 }

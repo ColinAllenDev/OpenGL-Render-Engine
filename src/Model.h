@@ -5,8 +5,11 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <vector>
+
 #include "Shader.h"
 #include "Mesh.h"
+
+unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 
 class Model {
 public:
@@ -21,7 +24,7 @@ private:
     void ProcessNode(aiNode *node, const aiScene *scene);
     Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
 
-    //TODO: std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+    std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
 };
 
 #endif

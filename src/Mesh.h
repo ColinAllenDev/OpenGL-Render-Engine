@@ -20,7 +20,7 @@ struct Vertex {
 struct Texture {
     unsigned int id;
     std::string type;
-    const char* path;
+    std::string path;
 };
 
 class Mesh {

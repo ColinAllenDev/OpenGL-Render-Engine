@@ -8,9 +8,6 @@
 #include "Camera.h"
 #include "Model.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 /* Forward Declaration */
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow* window);
@@ -63,18 +60,19 @@ int main() {
         return -1;
     }
 
-    /* Tell stb_image.h to flip loaded texture on y-axis before loading model */
-    stbi_set_flip_vertically_on_load(true);
-
     /* Configure global OpenGL State */
     glEnable(GL_DEPTH_TEST);
 
     /* Build and compile shader program */
-    Shader shader("/home/colin/Projects/RenderEngine/src/shaders/cube_v.glsl",
-                  "/home/colin/Projects/RenderEngine/src/shaders/cube_f.glsl");
+    Shader cube_shader("/home/colin/Projects/RenderEngine/src/shaders/default_v.glsl",
+                       "/home/colin/Projects/RenderEngine/src/shaders/default_f.glsl");
+    Shader sphere_shader("/home/colin/Projects/RenderEngine/src/shaders/light/light_v.glsl",
+                       "/home/colin/Projects/RenderEngine/src/shaders/light/light_f.glsl");
+
 
     /* Load Models */
     Model cube("/home/colin/Projects/RenderEngine/res/models/cube.obj");
+    Model sphere("/home/colin/Projects/RenderEngine/res/models/sphere.obj");
 
     /* Wireframe Mode */
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -94,25 +92,59 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // State-setting
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // State-using
 
+        /** CUBE **/
         // Activate Shader
-        shader.Use();
+        cube_shader.Use();
+
+        // Lighting
+        cube_shader.SetVec3("light.position", glm::vec3(1.2f, 1.0f, 2.0f));
+        cube_shader.SetVec3("viewPos", camera.Position);
+
+        glm::vec3 lightColor;
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+        cube_shader.SetVec3("light.ambient", ambientColor);
+        cube_shader.SetVec3("light.diffuse", diffuseColor);
+        cube_shader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        cube_shader.SetVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        cube_shader.SetVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        cube_shader.SetVec3("material.specular", 0.5f, 0.5f, 0.5f); // specular lighting doesn't have full effect on this object's material
+        cube_shader.SetFloat("material.shininess", 32.0f);
 
         // Pass projection matrix to shader
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_HEIGHT / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        shader.SetMat4("projection", projection);
+        cube_shader.SetMat4("projection", projection);
 
         // Camera/View Transformation
         glm::mat4 view = camera.GetViewMatrix();
-        shader.SetMat4("view", view);
+        cube_shader.SetMat4("view", view);
 
-        // Render Models
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(2.0f, 0.25f, 2.0f));
+        // Render Cube
+        glm::mat4 cube_model = glm::mat4(1.0f);
+        cube_model = glm::translate(cube_model, glm::vec3(0.0f, -1.0f, 0.0f));
+        cube_model = glm::scale(cube_model, glm::vec3(2.0f, 0.25f, 2.0f));
 
-        shader.SetMat4("model", model);
+        cube_shader.SetMat4("model", cube_model);
 
-        cube.Draw(shader);
+        cube.Draw(cube_shader);
+
+        /** SPHERE **/
+        sphere_shader.Use();
+
+        sphere_shader.SetMat4("projection", projection);
+        sphere_shader.SetMat4("view", view);
+
+        glm::mat4 sphere_model = glm::mat4(1.0f);
+        sphere_model = glm::translate(sphere_model, glm::vec3(1.2f, 1.0f, 2.0f));
+        sphere_model = glm::scale(sphere_model, glm::vec3(0.25f, 0.25f, 0.25f));
+        sphere_shader.SetMat4("model", sphere_model);
+
+        sphere.Draw(sphere_shader);
+
 
         /* Swap buffers and poll events */
         glfwSwapBuffers(window);
