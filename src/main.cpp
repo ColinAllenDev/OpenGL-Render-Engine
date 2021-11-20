@@ -64,10 +64,8 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     /* Build and compile shader program */
-    Shader cube_shader("/home/colin/Projects/RenderEngine/src/shaders/default_v.glsl",
-                       "/home/colin/Projects/RenderEngine/src/shaders/default_f.glsl");
-    Shader sphere_shader("/home/colin/Projects/RenderEngine/src/shaders/light/light_v.glsl",
-                       "/home/colin/Projects/RenderEngine/src/shaders/light/light_f.glsl");
+    Shader cube_shader("/home/colin/Projects/RenderEngine/res/shaders/default.shader");
+    Shader sphere_shader("/home/colin/Projects/RenderEngine/res/shaders/light/light.shader");
 
 
     /* Load Models */
@@ -174,6 +172,10 @@ void process_input(GLFWwindow* window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    /* DEBUG */
+    if(glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 void mouse_callback(GLFWwindow* window, double xPos, double yPos) {

@@ -1,35 +1,10 @@
 #include "Shader.h"
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath) {
-    /* Retrieve the vertex/fragment source code from filePath */
-    std::string vertexCode;
-    std::string fragmentCode;
-    std::ifstream vShaderFile;
-    std::ifstream fShaderFile;
-
-    /* Ensure ifstreams can throw exceptions */
-    vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-
-    try {
-        /* Open Files */
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        std::stringstream vShaderStream, fShaderStream;
-        /* Read file's buffer contents into streams */
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
-        /* Close file handlers */
-        vShaderFile.close();
-        fShaderFile.close();
-        /* Convert stream into string */
-        vertexCode   = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
-    } catch (std::ifstream::failure e) {
-        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ\n" << std::endl;
-    }
-    const char* vShaderCode = vertexCode.c_str();
-    const char* fShaderCode = fragmentCode.c_str();
+Shader::Shader(const char* path) {
+    /* Retrieve the shader source code from path */
+    ShaderSource sSource = LoadShader(path);
+    const char* vShaderCode = sSource.VertexSource.c_str();
+    const char* fShaderCode = sSource.FragmentSource.c_str();
 
     /* Compile Shaders */
     unsigned int vertex, fragment;
@@ -105,6 +80,38 @@ void Shader::SetMat3(const std::string &name, const glm::mat3 &mat) const {
 
 void Shader::SetMat4(const std::string &name, const glm::mat4 &mat) const {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+
+ShaderSource Shader::LoadShader(const char *path) {
+    /* Parse Shader */
+    enum class ShaderType {NONE = -1, VERTEX = 0, FRAGMENT = 1};
+    std::ifstream stream(path);
+    std::stringstream  ss[2];
+    std::string line;
+    ShaderType type = ShaderType::NONE;
+
+    /* Handle Exceptions */
+    stream.exceptions(std::ifstream::badbit);
+
+    try {
+        while(getline(stream, line)) {
+            if(line.find("#SHADER") != std::string::npos) {
+                if (line.find("::VERTEX") != std::string::npos)
+                    type = ShaderType::VERTEX;
+                else if (line.find("::FRAGMENT") != std::string::npos)
+                    type = ShaderType::FRAGMENT;
+            } else {
+                ss[(int)type] << line << '\n';
+            }
+        }
+
+    } catch (std::ifstream::failure& e) {
+        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+        std::cerr << "FILE: " << path << std::endl;
+        std::cerr << e.what() << "\n" << std::endl;
+    }
+
+    return {ss[0].str(), ss[1].str()};
 }
 
 void Shader::CheckCompileErrors(GLuint shader, std::string type) {

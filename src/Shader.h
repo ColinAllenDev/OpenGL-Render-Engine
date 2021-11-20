@@ -8,13 +8,18 @@
 #include <sstream>
 #include <iostream>
 
+struct ShaderSource {
+    std::string VertexSource;
+    std::string FragmentSource;
+};
+
 class Shader {
 public:
     /* Program ID */
     unsigned int ID;
 
     /* Constructor reads and builds the shader */
-    Shader(const char* vertexPath, const char* fragmentPath);
+    Shader(const char* path);
 
     /* Use/Activate the shader */
     void Use();
@@ -33,6 +38,9 @@ public:
     void SetMat3(const std::string &name, const glm::mat3 &mat) const;
     void SetMat4(const std::string &name, const glm::mat4 &mat) const;
 private:
+    /* Loading Utility */
+    ShaderSource LoadShader(const char* path);
+
     /* Error Checking/Handling */
     void CheckCompileErrors(GLuint shader, std::string type);
 };
