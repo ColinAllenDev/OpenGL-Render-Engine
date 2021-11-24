@@ -20,6 +20,7 @@ public:
 
     /* Constructor reads and builds the shader */
     Shader(const char* path);
+    Shader(const char* vPath, const char* fPath);
 
     /* Use/Activate the shader */
     void Use();
@@ -38,8 +39,10 @@ public:
     void SetMat3(const std::string &name, const glm::mat3 &mat) const;
     void SetMat4(const std::string &name, const glm::mat4 &mat) const;
 private:
-    /* Loading Utility */
+    /* Loading and Compiling */
     ShaderSource LoadShader(const char* path);
+    ShaderSource LoadShader(const char* vPath, const char* fPath);
+    void CompileShader(const char* vertex, const char* fragment);
 
     /* Error Checking/Handling */
     void CheckCompileErrors(GLuint shader, std::string type);

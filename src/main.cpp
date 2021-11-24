@@ -64,13 +64,13 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     /* Build and compile shader program */
-    Shader cube_shader("/home/colin/Projects/RenderEngine/res/shaders/default.shader");
-    Shader sphere_shader("/home/colin/Projects/RenderEngine/res/shaders/light/light.shader");
+    Shader cube_shader("/home/colin/Projects/OpenGL-Render-Engine/res/shaders/default.shader");
+    Shader sphere_shader("/home/colin/Projects/OpenGL-Render-Engine/res/shaders/light/light.shader");
 
 
     /* Load Models */
-    Model cube("/home/colin/Projects/RenderEngine/res/models/cube.obj");
-    Model sphere("/home/colin/Projects/RenderEngine/res/models/sphere.obj");
+    Model cube("/home/colin/Projects/OpenGL-Render-Engine/res/models/cube.obj");
+    Model sphere("/home/colin/Projects/OpenGL-Render-Engine/res/models/sphere.obj");
 
     /* Wireframe Mode */
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

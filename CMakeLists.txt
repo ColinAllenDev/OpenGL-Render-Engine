@@ -36,7 +36,7 @@ configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
 include_directories(${CMAKE_BINARY_DIR}/src)
 
 # Define the executable
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} src/Window.cpp src/Window.h)
 
 # We need a CMAKE_DIR with some code to find external dependencies
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -65,7 +65,7 @@ message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
 ADD_LIBRARY(GLAD "include/glad.c")
 
 # Put all libraries into a variable
-set(LIBS GL glfw3 GLAD assimp X11 Xxf86vm Xrandr pthread Xi dl)
+set(LIBS GL glfw GLAD assimp X11 Xxf86vm Xrandr pthread Xi dl)
 
 # Define the include directory
 include_directories("${CMAKE_SOURCE_DIR}/include")
